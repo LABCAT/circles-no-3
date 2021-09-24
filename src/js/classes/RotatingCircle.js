@@ -16,7 +16,7 @@ export default class AnimatedCicle{
     this.rottime = 8.0;
     this.movetime = 4.0;
     this.gathertime = 2.0;
-    this.offsetx = 0.0;
+    this.opacity = 0;
   }
 
   update(){
@@ -30,18 +30,15 @@ export default class AnimatedCicle{
       let t2 = this.p.map(this.time, this.rottime, this.rottime + this.movetime, 0.0, 1.0);
       t2 = this.p.constrain(t2, 0.0, 1.0);
       t2 = this.easeInOutCubic(t2);
-
-      //this.offsetx = this.p.width * t2;
-
-      if(t2 >= 1.0){
-        this.offsetx = 0;
+      if(t2 >= 0){
         let t3 = this.p.map(this.time, this.rottime + this.movetime, this.rottime + this.movetime + this.gathertime, 0.0, 1.0);
         t3 = this.p.constrain(t3, 0.0, 1.0);
         t3 = this.easeInOutCubic(t3);
-        //leave
-        this.rad = this.p.map(t3, 1.0, 0, this.p.max(this.p.width, this.p.height) * 1.5, this.origrad);
         //enter
-        this.rad = this.p.map(t3, 0, 1.0, this.p.max(this.p.width, this.p.height) * 1.5, this.origrad);
+        this.rad = this.p.map(t2, 0, 1.0, this.p.max(this.p.width, this.p.height) * 1.5, this.origrad);
+        //leave
+        this.rad = this.p.map(t2, 1.0, 0, this.p.max(this.p.width, this.p.height) * 1.5, this.origrad);
+        
 
         if(t3 >= 1.0){
             this.time = 0;
@@ -50,17 +47,23 @@ export default class AnimatedCicle{
     }
     
     //reverse
-    this.pos = window.p5.Vector.add(this.origpos, this.p.createVector(this.offsetx + this.rad * this.p.cos(-this.ang), this.rad * this.p.sin(-this.ang), 0));
+    this.pos = window.p5.Vector.add(this.origpos, this.p.createVector(this.rad * this.p.cos(-this.ang), this.rad * this.p.sin(-this.ang), 0));
     //forward
-    this.pos = window.p5.Vector.add(this.origpos, this.p.createVector(this.offsetx + this.rad * this.p.cos(this.ang), this.rad * this.p.sin(this.ang), 0));
+    this.pos = window.p5.Vector.add(this.origpos, this.p.createVector(this.rad * this.p.cos(this.ang), this.rad * this.p.sin(this.ang), 0));
 
     this.time += this.p.deltaTime * 0.001;
   }
 
   draw(){
     this.p.noStroke();
-    this.p.fill('blue');
+    this.p.fill(0, 0, 255, this.opacity);
     this.p.circle(this.pos.x, this.pos.y, this.size);
+    this.p.circle(this.pos.x, this.pos.y, this.size / 2);
+    this.p.circle(this.pos.x, this.pos.y, this.size / 4);
+
+    if(this.opacity < 64){
+      this.opacity = this.opacity + 0.2;
+    }
   }
 
     easeOutCubic(x) {
