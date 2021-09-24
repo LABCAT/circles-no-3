@@ -6,6 +6,7 @@ import { Midi } from '@tonejs/midi'
 
 import audio from "../audio/circles-no-3.ogg";
 import midi from "../audio/circles-no-3.mid";
+import RotatingCircle from "./classes/RotatingCircle.js";
 
 const P5SketchWithAudio = () => {
     const sketchRef = useRef();
@@ -23,6 +24,12 @@ const P5SketchWithAudio = () => {
         p.player = null;
 
         p.PPQ = 3840 * 4;
+
+        p.rotatingCircles = [];
+
+        p.rotatingCircleSize = 30;
+
+        p.numOfRotatingCircles = 16;
 
         p.loadMidi = () => {
             Midi.fromUrl(midi).then(
@@ -54,20 +61,31 @@ const P5SketchWithAudio = () => {
 
         p.setup = () => {
             p.canvas = p.createCanvas(p.canvasWidth, p.canvasHeight);
-            p.background(0);
+            p.prepareRotatingCircles(p.rotatingCircleSize);
         }
 
         p.draw = () => {
             if(p.audioLoaded && p.song.isPlaying()){
-
+                p.background(255);
+                for(let i=0; i < p.rotatingCircles.length; i++){
+                    const circle = p.rotatingCircles[i];
+                    circle.update();
+                    circle.draw();
+                }
             }
         }
 
         p.executeCueSet1 = (note) => {
-            p.background(p.random(255), p.random(255), p.random(255));
-            p.fill(p.random(255), p.random(255), p.random(255));
-            p.noStroke();
-            p.ellipse(p.width / 2, p.height / 2, p.width / 4, p.width / 4);
+        }
+
+        p.prepareRotatingCircles = () => {
+            p.rotatingCircles = [];
+            const rad = p.min(p.width, p.height) * 0.3;
+            for(let i=0; i < p.numOfRotatingCircles; i++){
+                const ang = p.TWO_PI / p.numOfRotatingCircles * (i  + 0.5) + p.PI,
+                    circle = new RotatingCircle(p, ang, rad, p.numOfRotatingCircles, p.rotatingCircleSize);
+                p.rotatingCircles.push(circle);
+            }
         }
 
         p.mousePressed = () => {
