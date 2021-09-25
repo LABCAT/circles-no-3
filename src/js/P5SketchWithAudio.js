@@ -6,6 +6,7 @@ import { Midi } from '@tonejs/midi'
 
 import audio from "../audio/circles-no-3.ogg";
 import midi from "../audio/circles-no-3.mid";
+import ShuffleArray from "./functions/ShuffleArray.js";
 import RotatingCircle from "./classes/RotatingCircle.js";
 
 const P5SketchWithAudio = () => {
@@ -126,17 +127,23 @@ const P5SketchWithAudio = () => {
                     }
                 }
                 
-                for (let particle = 0; particle < p.mass.length; particle++) {
+                for (let particle = 0; particle < p.parts.length; particle++) {
                     p.positionX[particle] += p.velocityX[particle];
                     p.positionY[particle] += p.velocityY[particle];
-                    p.stroke(p.parts[particle].stroke);
-                    p.fill(p.parts[particle].colour);
+                    const { size, hue1, hue2, hue3, hue4, strokeOpacity } = p.parts[particle];
+                    console.log(hue1);
+                    p.stroke(0, 0, 100, strokeOpacity);
+                    p.fill(hue1, 100, 100, 0.25);
                     p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 2000, p.parts[particle].size * 2000);
-                    p.stroke(p.parts[particle].stroke);
+                    p.stroke(0, 0, 100, strokeOpacity);
+                    p.fill(hue2, 100, 100, 0.25);
                     p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 1000, p.parts[particle].size * 1000);
-                    p.stroke(p.parts[particle].colour);
+                    p.stroke(hue3, 100, 100, 1);
+                    p.fill(hue3, 100, 100, 0.25);
                     p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 500, p.parts[particle].size * 500);
-                    p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 500, p.parts[particle].size * 250);
+                    p.stroke(hue3, 100, 100, 0);
+                    p.fill(hue4, 100, 100, 0.25);
+                    p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 250, p.parts[particle].size * 250);
                 }
 
                 for(let i=0; i < p.rotatingCircles.length; i++){
@@ -149,34 +156,29 @@ const P5SketchWithAudio = () => {
 
         p.executeCueSet1 = (note) => {
             const { midi } = note;
-            let colour = null, 
-                posX =  p.random(0, p.width), 
-                posY= 0;
+            let posX = 0, 
+                posY = p.random(0, p.height);
             switch (midi) {
                 case 36:
-                    colour = p.color(255, 64, 255, 64);
-                    posY = p.random(p.height / 2, p.height);
+                    posX = p.random(0, p.width / 4 * 1);
                     break;
                 case 37:
-                    colour = p.color(255, 255, 64, 64);
-                    posY = p.random(0, p.height / 2);
+                    posX = p.random(p.width / 4 * 3, p.width);
                     break;
                 default:
-                    colour = p.color(64, 255, 255, 64);
                     break;
             }
-            p.addNewParticle(colour, posX, posY);
+            p.addNewParticle(midi, posX, posY);
         }
 
 
         p.executeCueSet2 = (note) => {
             const { currentCue, durationTicks } = note;
-            console.log(currentCue);
             if(durationTicks > 4000) {
                 p.swarm = true;
                 p.currentAnimationIndex++;
                 p.parts.forEach(particle => {
-                    particle.stroke = particle.colour; 
+                    particle.strokeOpacity = 0; 
                 });
             }
             else {
@@ -193,13 +195,29 @@ const P5SketchWithAudio = () => {
             }
         }
 
-        p.addNewParticle = (colour, posX, posY) => {
+        p.hueSet1 = [30, 60, 90, 120, 150, 180];
+
+        p.hueSet2 = [210, 240, 270, 300, 330, 360];
+
+        p.addNewParticle = (midi, posX, posY) => {
             let size = p.random(0.003, 0.03);
+            let hueSet = [];
+            switch (midi) {
+                case 36:
+                    hueSet = ShuffleArray(p.hueSet2);
+                    break;
+                case 37:
+                    hueSet = ShuffleArray(p.hueSet1);
+                    break;
+            }
             p.parts.push(
                 {
                     size: size,
-                    colour: colour,
-                    stroke: p.swarm ? colour : 255
+                    hue1: hueSet[0],
+                    hue2: hueSet[1],
+                    hue3: hueSet[2],
+                    hue4: hueSet[3],
+                    strokeOpacity: p.swarm ? 0 : 1
                 } 
             );
             p.mass.push(size);
