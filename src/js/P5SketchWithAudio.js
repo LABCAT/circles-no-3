@@ -48,9 +48,9 @@ const P5SketchWithAudio = () => {
             Midi.fromUrl(midi).then(
                 function(result) {
                     console.log(result);
-                    const noteSet1 = result.tracks[7].notes.filter(note => note.midi !== 43); // Redrum 1 
+                    //const noteSet1 = result.tracks[7].notes.filter(note => note.midi !== 43); // Redrum 1 
+                    const noteSet1 = result.tracks[5].notes; // Synth 1
                     const noteSet2 = result.tracks[1].notes; // Smapler 2
-                    //const noteSet1 = result.tracks[5].notes; // Synth 1
                     p.scheduleCueSet(noteSet1, 'executeCueSet1', true);
                     p.scheduleCueSet(noteSet2, 'executeCueSet2');
                     p.audioLoaded = true;
@@ -131,7 +131,6 @@ const P5SketchWithAudio = () => {
                     p.positionX[particle] += p.velocityX[particle];
                     p.positionY[particle] += p.velocityY[particle];
                     const { size, hue1, hue2, hue3, hue4, strokeOpacity } = p.parts[particle];
-                    console.log(hue1);
                     p.stroke(0, 0, 100, strokeOpacity);
                     p.fill(hue1, 100, 100, 0.25);
                     p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 2000, p.parts[particle].size * 2000);
@@ -159,10 +158,10 @@ const P5SketchWithAudio = () => {
             let posX = 0, 
                 posY = p.random(0, p.height);
             switch (midi) {
-                case 36:
+                case 60:
                     posX = p.random(0, p.width / 4 * 1);
                     break;
-                case 37:
+                case 62:
                     posX = p.random(p.width / 4 * 3, p.width);
                     break;
                 default:
@@ -203,10 +202,10 @@ const P5SketchWithAudio = () => {
             let size = p.random(0.003, 0.03);
             let hueSet = [];
             switch (midi) {
-                case 36:
+                case 60:
                     hueSet = ShuffleArray(p.hueSet2);
                     break;
-                case 37:
+                case 62:
                     hueSet = ShuffleArray(p.hueSet1);
                     break;
             }
@@ -244,7 +243,7 @@ const P5SketchWithAudio = () => {
                     p.song.pause();
                 } else {
                     if (parseInt(p.song.currentTime()) >= parseInt(p.song.buffer.duration)) {
-                        p.reset();
+                        //p.reset();
                     }
                     //document.getElementById("play-icon").classList.add("fade-out");
                     p.canvas.addClass("fade-in");
