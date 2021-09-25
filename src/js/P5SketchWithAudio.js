@@ -29,7 +29,7 @@ const P5SketchWithAudio = () => {
 
         p.rotatingCircleSize = 15;
 
-        p.numOfRotatingCircles = 16;
+        p.numOfRotatingCircles = 18;
 
         p.parts = [];
 
@@ -47,7 +47,7 @@ const P5SketchWithAudio = () => {
             Midi.fromUrl(midi).then(
                 function(result) {
                     console.log(result);
-                    const noteSet1 = result.tracks[8].notes.filter(note => note.midi !== 43); // Redrum 1 - Copy
+                    const noteSet1 = result.tracks[7].notes.filter(note => note.midi !== 43); // Redrum 1 
                     const noteSet2 = result.tracks[1].notes; // Smapler 2
                     //const noteSet1 = result.tracks[5].notes; // Synth 1
                     p.scheduleCueSet(noteSet1, 'executeCueSet1', true);
@@ -63,23 +63,41 @@ const P5SketchWithAudio = () => {
         }
 
         p.scheduleCueSet = (noteSet, callbackName, polyMode = false)  => {
-            let lastTicks = -1;
+            let lastTicks = -1, 
+                currentCue = 1;
             for (let i = 0; i < noteSet.length; i++) {
                 const note = noteSet[i],
                     { ticks, time } = note;
                 if(ticks !== lastTicks || polyMode){
-                    note.currentCue = i + 1;
+                    note.currentCue = currentCue;
                     p.song.addCue(time, p[callbackName], note);
                     lastTicks = ticks;
+                    currentCue++;
                 }
             }
         } 
 
         p.setup = () => {
             p.canvas = p.createCanvas(p.canvasWidth, p.canvasHeight);
+            p.colorMode(p.HSB);
             p.background(0);
             p.prepareRotatingCircles(p.rotatingCircleSize);
         }
+
+        p.animationSequence = [
+            'clockwise',
+            'exit',
+            'enter',
+            'antiClockwise',
+            'exit',
+            'enter',
+            'clockwise',
+            'exit',
+            'enter',
+            'exit',
+        ];
+
+        p.currentAnimationIndex = 0;
 
         p.draw = () => {
             if(p.audioLoaded && p.song.isPlaying()){
@@ -123,7 +141,7 @@ const P5SketchWithAudio = () => {
 
                 for(let i=0; i < p.rotatingCircles.length; i++){
                     const circle = p.rotatingCircles[i];
-                    circle.update();
+                    circle[p.animationSequence[p.currentAnimationIndex]]();
                     circle.draw();
                 }
             }
@@ -131,25 +149,32 @@ const P5SketchWithAudio = () => {
 
         p.executeCueSet1 = (note) => {
             const { midi } = note;
-            let colour = null, posX = p.random(0, p.width);;
+            let colour = null, 
+                posX =  p.random(0, p.width), 
+                posY= 0;
             switch (midi) {
                 case 36:
                     colour = p.color(255, 64, 255, 64);
+                    posY = p.random(p.height / 2, p.height);
                     break;
                 case 37:
                     colour = p.color(255, 255, 64, 64);
+                    posY = p.random(0, p.height / 2);
                     break;
                 default:
                     colour = p.color(64, 255, 255, 64);
                     break;
             }
-            p.addNewParticle(colour, posX);
+            p.addNewParticle(colour, posX, posY);
         }
 
 
         p.executeCueSet2 = (note) => {
-            if(note.durationTicks > 4000) {
+            const { currentCue, durationTicks } = note;
+            console.log(currentCue);
+            if(durationTicks > 4000) {
                 p.swarm = true;
+                p.currentAnimationIndex++;
                 p.parts.forEach(particle => {
                     particle.stroke = particle.colour; 
                 });
@@ -157,9 +182,18 @@ const P5SketchWithAudio = () => {
             else {
                 p.swarm = false;
             }
+
+            const changeCues = [3, 45];
+            if(changeCues.includes(currentCue)){
+                p.currentAnimationIndex++;
+                for(let i=0; i < p.rotatingCircles.length; i++){
+                    const circle = p.rotatingCircles[i];
+                    circle.resetTime();
+                }
+            }
         }
 
-        p.addNewParticle = (colour, posX) => {
+        p.addNewParticle = (colour, posX, posY) => {
             let size = p.random(0.003, 0.03);
             p.parts.push(
                 {
@@ -170,7 +204,7 @@ const P5SketchWithAudio = () => {
             );
             p.mass.push(size);
             p.positionX.push(posX);
-            p.positionY.push(p.random(0, p.height));
+            p.positionY.push(posY);
             p.velocityX.push(0);
             p.velocityY.push(0);
         }
@@ -180,7 +214,8 @@ const P5SketchWithAudio = () => {
             const rad = p.min(p.width, p.height) * 0.4;
             for(let i=0; i < p.numOfRotatingCircles; i++){
                 const ang = p.TWO_PI / p.numOfRotatingCircles * (i  + 0.5) + p.PI,
-                    circle = new RotatingCircle(p, ang, rad, p.numOfRotatingCircles, p.rotatingCircleSize);
+                    hue = i * (360 / p.numOfRotatingCircles),
+                    circle = new RotatingCircle(p, ang, rad, p.numOfRotatingCircles, p.rotatingCircleSize, hue);
                 p.rotatingCircles.push(circle);
             }
         }
