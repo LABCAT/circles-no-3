@@ -22,6 +22,8 @@ const P5SketchWithAudio = () => {
 
         p.audioLoaded = false;
 
+        p.songHasFinished = false;
+
         p.player = null;
 
         p.PPQ = 3840 * 4;
@@ -50,7 +52,7 @@ const P5SketchWithAudio = () => {
                     console.log(result);
                     //const noteSet1 = result.tracks[7].notes.filter(note => note.midi !== 43); // Redrum 1 
                     const noteSet1 = result.tracks[5].notes; // Synth 1
-                    const noteSet2 = result.tracks[1].notes; // Smapler 2
+                    const noteSet2 = result.tracks[1].notes; // Sampler 2
                     p.scheduleCueSet(noteSet1, 'executeCueSet1', true);
                     p.scheduleCueSet(noteSet2, 'executeCueSet2');
                     p.audioLoaded = true;
@@ -61,6 +63,7 @@ const P5SketchWithAudio = () => {
 
         p.preload = () => {
             p.song = p.loadSound(audio, p.loadMidi);
+            p.song.onended(p.logCredits);
         }
 
         p.scheduleCueSet = (noteSet, callbackName, polyMode = false)  => {
@@ -101,7 +104,7 @@ const P5SketchWithAudio = () => {
         p.currentAnimationIndex = 0;
 
         p.draw = () => {
-            if(p.audioLoaded && p.song.isPlaying()){
+            if(p.audioLoaded && p.song.isPlaying() || p.songHasFinished){
                 p.background(0);
 
                 if(p.swarm){
@@ -131,6 +134,7 @@ const P5SketchWithAudio = () => {
                     p.positionX[particle] += p.velocityX[particle];
                     p.positionY[particle] += p.velocityY[particle];
                     const { size, hue1, hue2, hue3, hue4, strokeOpacity } = p.parts[particle];
+                    p.strokeWeight(1);
                     p.stroke(0, 0, 100, strokeOpacity);
                     p.fill(hue1, 100, 100, 0.25);
                     p.ellipse(p.positionX[particle], p.positionY[particle], p.parts[particle].size * 2000, p.parts[particle].size * 2000);
@@ -153,21 +157,32 @@ const P5SketchWithAudio = () => {
             }
         }
 
+        p.cueSet1DirectionDown = false;  
+
         p.executeCueSet1 = (note) => {
-            const { midi } = note;
-            let posX = 0, 
-                posY = p.random(0, p.height);
-            switch (midi) {
-                case 60:
-                    posX = p.random(0, p.width / 4 * 1);
-                    break;
-                case 62:
-                    posX = p.random(p.width / 4 * 3, p.width);
-                    break;
-                default:
-                    break;
+            const { currentCue, ticks } = note;
+            if(ticks % 122880 === 0) {
+                p.cueSet1DirectionDown = !p.cueSet1DirectionDown;
             }
-            p.addNewParticle(midi, posX, posY);
+            if(!p.swarm || currentCue > 200){
+                const { midi } = note,
+                    mapStart1 =  p.cueSet1DirectionDown ? 0 : 122880,
+                    mapStart2 =  p.cueSet1DirectionDown ? 122880 : 0;
+                let posX = 0, 
+                    posY = p.map(ticks % 122880, mapStart1, mapStart2, 0 + p.height / 20, p.height - p.height / 20);
+                switch (midi) {
+                    case 60:
+                        posX = p.random(0 + p.width / 40, p.width / 4 * 1);
+                        //posX = p.map(ticks, 0, 119040, 0 + p.width / 20,  p.width / 4 * 1);
+                        break;
+                    case 62:
+                        posX = p.random(p.width / 4 * 3, p.width - p.width / 40);
+                        break;
+                    default:
+                        break;
+                }
+                p.addNewParticle(midi, posX, posY);
+            }
         }
 
 
@@ -216,7 +231,7 @@ const P5SketchWithAudio = () => {
                     hue2: hueSet[1],
                     hue3: hueSet[2],
                     hue4: hueSet[3],
-                    strokeOpacity: p.swarm ? 0 : 1
+                    strokeOpacity: 1
                 } 
             );
             p.mass.push(size);
@@ -235,6 +250,10 @@ const P5SketchWithAudio = () => {
                     circle = new RotatingCircle(p, ang, rad, p.numOfRotatingCircles, p.rotatingCircleSize, hue);
                 p.rotatingCircles.push(circle);
             }
+        }
+
+        p.logCredits = () => {
+            p.songHasFinished = true;
         }
 
         p.mousePressed = () => {

@@ -68,8 +68,9 @@ export default class AnimatedCicle{
   }
 
   draw(){
-    this.p.noStroke();
+    this.p.strokeWeight(2);
     this.p.fill(this.hue, 100, 100, this.opacity);
+    this.p.stroke(this.hue, 100, 100, this.opacity * 2);
     this.p.circle(this.pos.x, this.pos.y, this.size);
     this.p.circle(this.pos.x, this.pos.y, this.size / 2);
     this.p.circle(this.pos.x, this.pos.y, this.size / 4);
