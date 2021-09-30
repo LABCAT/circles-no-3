@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/circles-no-3/static/css/main.4d34e0b9.chunk.css",
+    "main.js": "/circles-no-3/static/js/main.16cf6834.chunk.js",
+    "main.js.map": "/circles-no-3/static/js/main.16cf6834.chunk.js.map",
+    "runtime-main.js": "/circles-no-3/static/js/runtime-main.0dda8a65.js",
+    "runtime-main.js.map": "/circles-no-3/static/js/runtime-main.0dda8a65.js.map",
+    "static/js/2.b90f6f19.chunk.js": "/circles-no-3/static/js/2.b90f6f19.chunk.js",
+    "static/js/2.b90f6f19.chunk.js.map": "/circles-no-3/static/js/2.b90f6f19.chunk.js.map",
+    "index.html": "/circles-no-3/index.html",
+    "static/css/main.4d34e0b9.chunk.css.map": "/circles-no-3/static/css/main.4d34e0b9.chunk.css.map",
+    "static/js/2.b90f6f19.chunk.js.LICENSE.txt": "/circles-no-3/static/js/2.b90f6f19.chunk.js.LICENSE.txt",
+    "static/media/circles-no-3.24a5bbf5.ogg": "/circles-no-3/static/media/circles-no-3.24a5bbf5.ogg",
+    "static/media/circles-no-3.ba7fefd4.mid": "/circles-no-3/static/media/circles-no-3.ba7fefd4.mid"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.0dda8a65.js",
+    "static/js/2.b90f6f19.chunk.js",
+    "static/css/main.4d34e0b9.chunk.css",
+    "static/js/main.16cf6834.chunk.js"
+  ]
+}
